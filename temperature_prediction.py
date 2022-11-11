@@ -47,8 +47,8 @@ def predict_on_material(mu_mtx, std_mtx, temps, model, verbose=False, noise=Fals
         input_std = std_mtx[i,:]
         
         if noise: 
-            temp33 += np.random.normal(np.zeros(4), std33, 4) 
-            input_vec += np.random.normal(np.zeros(4), input_std, 4)
+            temp33 += np.random.normal(np.zeros(4), std33, 4) / np.sqrt(10)
+            input_vec += np.random.normal(np.zeros(4), input_std, 4) / np.sqrt(10)
 
         delta = (input_vec - temp33) * 100
         network_inp = np.concatenate([input_vec, delta], axis=1)
@@ -61,3 +61,13 @@ def predict_on_material(mu_mtx, std_mtx, temps, model, verbose=False, noise=Fals
     print("")
 
     return predictions
+
+# compute standard deviation of predictions
+def get_pred_std(mu_mtx, std_mtx, temps, model, num):
+    predictions = []
+    
+    for i in range(num):
+        preds = predict_on_material(mu_mtx, std_mtx, temps, model, noise=True)
+        predictions.append(preds)
+
+    return np.std(np.array(predictions), axis=0)
